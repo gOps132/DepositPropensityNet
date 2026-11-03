@@ -4,7 +4,7 @@ using System.IO;
 
 namespace DepositPropensityNet.ML {
 	/// <summary>
-	/// A 3-layer feed-forward Multi-Layer Perceptron (Input, Hidden, and Output layers)
+	/// A feed-forward Multi-Layer Perceptron (Input, Hidden, and Output layers)
 	/// using sigmoid activations and trained via stochastic gradient descent (backpropagation).
 	/// </summary>
 	public class NeuralNetwork {

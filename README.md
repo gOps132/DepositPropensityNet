@@ -1,6 +1,6 @@
 # DepositPropensityNet
 
-A 3-layer Multi-Layer Perceptron (MLP) built from scratch in C# to predict whether a bank client will subscribe to a term deposit (`"yes"` vs `"no"`) based on direct marketing campaign data. It uses no external machine learning libraries—only the custom [`InputNeuron`](src/ML/InputNeuron.cs), [`HiddenNeuron`](src/ML/HiddenNeuron.cs), [`OutputNeuron`](src/ML/OutputNeuron.cs), and [`NeuralNetwork`](src/ML/NeuralNetwork.cs) classes in this repository.
+A Multi-Layer Perceptron (MLP) binary classifier built from scratch in C# to predict whether a bank client will subscribe to a term deposit (`"yes"` vs `"no"`) based on direct marketing campaign data. It uses no external machine learning libraries—only the custom [`InputNeuron`](src/ML/InputNeuron.cs), [`HiddenNeuron`](src/ML/HiddenNeuron.cs), [`OutputNeuron`](src/ML/OutputNeuron.cs), and [`NeuralNetwork`](src/ML/NeuralNetwork.cs) classes in this repository.
 
 ## Built with
 
@@ -139,7 +139,7 @@ Training log (`36,168` train / `9,043` test, logged every 100 epochs):
 
 - **Overall Accuracy**: **89.24%** (**89.75%** unweighted)
 - **Confusion Matrix**: `TN = 7,768`, `FP = 256`, `FN = 717`, `TP = 302`
-- **Performance Analysis**: After removing `duration` (which leaks call length), predicting term deposit conversion relies purely on pre-call client demographics (`job`, `marital`, `education`, `balance`, `housing`, `loan`) and prior campaign history (`poutcome = "success"`, `pdays`, `contact`, `month`). Because only `11.27%` (`1,019 / 9,043`) of test clients subscribe, a trivial majority-class classifier gets `88.73%` accuracy with `0%` recall. Our 3-layer MLP exceeds baseline accuracy (`89.24%–89.90%`) while achieving **54.1%–62.6% precision** on predicted subscribers—nearly $5\times$ the random-call conversion rate (`11.3%`)—making it directly actionable for prioritizing high-propensity outbound marketing calls.
+- **Performance Analysis**: After removing `duration` (which leaks call length), predicting term deposit conversion relies purely on pre-call client demographics (`job`, `marital`, `education`, `balance`, `housing`, `loan`) and prior campaign history (`poutcome = "success"`, `pdays`, `contact`, `month`). Because only `11.27%` (`1,019 / 9,043`) of test clients subscribe, a trivial majority-class classifier gets `88.73%` accuracy with `0%` recall. Our custom Multi-Layer Perceptron exceeds baseline accuracy (`89.24%–89.90%`) while achieving **54.1%–62.6% precision** on predicted subscribers—nearly $5\times$ the random-call conversion rate (`11.3%`)—making it directly actionable for prioritizing high-propensity outbound marketing calls.
 
 ![Training and validation loss (unweighted)](logs/loss-h32-lr0.05-hlr0.05-e300-s1234.svg)
 
@@ -157,7 +157,7 @@ Training log (`36,168` train / `9,043` test, logged every 100 epochs):
 | [`src/ML/InputNeuron.cs`](src/ML/InputNeuron.cs) | Input-layer neuron storing feature value and input-to-hidden weights |
 | [`src/ML/HiddenNeuron.cs`](src/ML/HiddenNeuron.cs) | Hidden-layer neuron with sigmoid activation, bias, delta, and output weights |
 | [`src/ML/OutputNeuron.cs`](src/ML/OutputNeuron.cs) | Output-layer neuron producing sigmoid subscription probability |
-| [`src/ML/NeuralNetwork.cs`](src/ML/NeuralNetwork.cs) | 3-layer MLP forward pass, MSE loss, backpropagation, and weight persistence |
+| [`src/ML/NeuralNetwork.cs`](src/ML/NeuralNetwork.cs) | Multi-Layer Perceptron forward pass, MSE loss, backpropagation, and weight persistence |
 | [`src/ML/TrainingConfig.cs`](src/ML/TrainingConfig.cs) | Reproducible command-line hyperparameter configuration parser |
 | [`src/ML/Metrics.cs`](src/ML/Metrics.cs) | Binary classification Accuracy, Precision, Recall, F1, and 2×2 confusion matrix |
 | [`src/ML/ChartWriter.cs`](src/ML/ChartWriter.cs) | Dependency-free SVG line chart and confusion matrix renderer |
