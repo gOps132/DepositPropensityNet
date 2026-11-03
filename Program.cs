@@ -85,14 +85,15 @@ namespace DepositPropensityNet {
 			List<string> logRows = new List<string>(config.Epochs + 1);
 			logRows.Add("epoch,train_loss,train_accuracy,val_loss,val_accuracy,val_precision,val_recall,val_f1,seconds");
 
-			double[] trainLosses = new double[config.Epochs];
-			double[] validationLosses = new double[config.Epochs];
-			double[] trainAccuracies = new double[config.Epochs];
-			double[] validationAccuracies = new double[config.Epochs];
+			List<double> trainLosses = new List<double>(config.Epochs);
+			List<double> validationLosses = new List<double>(config.Epochs);
+			List<double> trainAccuracies = new List<double>(config.Epochs);
+			List<double> validationAccuracies = new List<double>(config.Epochs);
 
 			double bestValidationLoss = double.MaxValue;
 			double bestValidationAccuracy = 0.0;
 			int bestEpoch = 0;
+			int epochsRun = 0;
 			int logInterval = config.EffectiveLogInterval;
 			DateTime trainingStart = DateTime.Now;
 
@@ -124,10 +125,11 @@ namespace DepositPropensityNet {
 				double trainAccuracy = 100.0 * trainCorrect / trainIndices.Length;
 				double valAccuracyPercent = validation.Metrics.Accuracy * 100.0;
 
-				trainLosses[epoch - 1] = trainLoss;
-				validationLosses[epoch - 1] = validation.Loss;
-				trainAccuracies[epoch - 1] = trainAccuracy;
-				validationAccuracies[epoch - 1] = valAccuracyPercent;
+				trainLosses.Add(trainLoss);
+				validationLosses.Add(validation.Loss);
+				trainAccuracies.Add(trainAccuracy);
+				validationAccuracies.Add(valAccuracyPercent);
+				epochsRun = epoch;
 
 				if (validation.Loss < bestValidationLoss) {
 					bestValidationLoss = validation.Loss;
@@ -140,9 +142,17 @@ namespace DepositPropensityNet {
 				logRows.Add(FormattableString.Invariant(
 					$"{epoch},{trainLoss:F6},{trainAccuracy:F3},{validation.Loss:F6},{valAccuracyPercent:F3},{validation.Metrics.PositivePrecision:F4},{validation.Metrics.PositiveRecall:F4},{validation.Metrics.PositiveF1:F4},{seconds:F2}"));
 
-				if (epoch == 1 || epoch % logInterval == 0 || epoch == config.Epochs) {
+				bool stopEarly = config.Patience > 0 && epoch - bestEpoch >= config.Patience;
+
+				if (epoch == 1 || epoch % logInterval == 0 || epoch == config.Epochs || stopEarly) {
 					Console.WriteLine(FormattableString.Invariant(
 						$"epoch {epoch,4}  loss {trainLoss:F5}  train {trainAccuracy,6:F2}%  val_loss {validation.Loss:F5}  val {valAccuracyPercent,6:F2}%  prec {validation.Metrics.PositivePrecision * 100.0,5:F1}%  rec {validation.Metrics.PositiveRecall * 100.0,5:F1}%  f1 {validation.Metrics.PositiveF1:F3}  {seconds,5:F2}s"));
+				}
+
+				if (stopEarly) {
+					Console.WriteLine(FormattableString.Invariant(
+						$"early stop: no validation-loss improvement for {config.Patience} epochs (best epoch {bestEpoch})"));
+					break;
 				}
 			}
 
@@ -157,7 +167,7 @@ namespace DepositPropensityNet {
 				"Training and validation loss",
 				"MSE loss",
 				new[] { "train", "validation" },
-				new[] { trainLosses, validationLosses },
+				new[] { trainLosses.ToArray(), validationLosses.ToArray() },
 				0.0,
 				false);
 			ChartWriter.WriteLineChart(
@@ -165,7 +175,7 @@ namespace DepositPropensityNet {
 				"Training and validation accuracy",
 				"accuracy",
 				new[] { "train", "validation" },
-				new[] { trainAccuracies, validationAccuracies },
+				new[] { trainAccuracies.ToArray(), validationAccuracies.ToArray() },
 				100.0,
 				true);
 
@@ -201,7 +211,7 @@ namespace DepositPropensityNet {
 			}
 
 			if (!string.IsNullOrEmpty(config.SummaryCsvPath)) {
-				AppendSummary(config, trainIndices.Length, validationIndices.Length, bestEpoch, bestEval, totalSeconds);
+				AppendSummary(config, trainIndices.Length, validationIndices.Length, epochsRun, bestEpoch, bestEval, totalSeconds);
 			}
 		}
 
@@ -265,6 +275,7 @@ namespace DepositPropensityNet {
 			TrainingConfig config,
 			int trainSamples,
 			int valSamples,
+			int epochsRun,
 			int bestEpoch,
 			EvaluationResult bestEval,
 			double totalSeconds) {
@@ -276,12 +287,12 @@ namespace DepositPropensityNet {
 			bool writeHeader = !File.Exists(config.SummaryCsvPath);
 			using (StreamWriter writer = new StreamWriter(config.SummaryCsvPath!, append: true)) {
 				if (writeHeader) {
-					writer.WriteLine("data,hidden,output_lr,hidden_lr,pos_weight,epochs,seed,train_samples,val_samples,best_epoch,best_val_loss,accuracy,yes_precision,yes_recall,yes_f1,macro_f1,tn,fp,fn,tp,total_seconds");
+					writer.WriteLine("data,hidden,output_lr,hidden_lr,pos_weight,max_epochs,patience,epochs_run,seed,train_samples,val_samples,best_epoch,best_val_loss,accuracy,yes_precision,yes_recall,yes_f1,macro_f1,tn,fp,fn,tp,total_seconds");
 				}
 
 				ClassificationMetrics m = bestEval.Metrics;
 				writer.WriteLine(FormattableString.Invariant(
-					$"{Path.GetFileName(config.DataPath)},{config.HiddenCount},{config.OutputLearningRate:F4},{config.HiddenLearningRate:F4},{config.PositiveClassWeight:F2},{config.Epochs},{config.Seed},{trainSamples},{valSamples},{bestEpoch},{bestEval.Loss:F6},{m.Accuracy * 100.0:F3},{m.PositivePrecision * 100.0:F3},{m.PositiveRecall * 100.0:F3},{m.PositiveF1:F4},{m.MacroF1:F4},{m.TrueNegatives},{m.FalsePositives},{m.FalseNegatives},{m.TruePositives},{totalSeconds:F2}"));
+					$"{Path.GetFileName(config.DataPath)},{config.HiddenCount},{config.OutputLearningRate:F4},{config.HiddenLearningRate:F4},{config.PositiveClassWeight:F2},{config.Epochs},{config.Patience},{epochsRun},{config.Seed},{trainSamples},{valSamples},{bestEpoch},{bestEval.Loss:F6},{m.Accuracy * 100.0:F3},{m.PositivePrecision * 100.0:F3},{m.PositiveRecall * 100.0:F3},{m.PositiveF1:F4},{m.MacroF1:F4},{m.TrueNegatives},{m.FalsePositives},{m.FalseNegatives},{m.TruePositives},{totalSeconds:F2}"));
 			}
 		}
 	}

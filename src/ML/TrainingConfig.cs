@@ -14,6 +14,7 @@ namespace DepositPropensityNet.ML {
 		public double HiddenLearningRate { get; set; } = 0.05;
 		public double PositiveClassWeight { get; set; } = 1.0;
 		public int Epochs { get; set; } = 100;
+		public int Patience { get; set; }
 		public int? LogInterval { get; set; }
 		public int Seed { get; set; } = 1234;
 		public int? TrainLimit { get; set; }
@@ -46,7 +47,7 @@ namespace DepositPropensityNet.ML {
 					? FormattableString.Invariant($"-pw{PositiveClassWeight:0.##}")
 					: string.Empty;
 				return FormattableString.Invariant(
-					$"h{HiddenCount}-lr{OutputLearningRate:0.###}-hlr{HiddenLearningRate:0.###}{posWeightSuffix}-e{Epochs}-s{Seed}");
+					$"h{HiddenCount}-lr{OutputLearningRate:0.###}-hlr{HiddenLearningRate:0.###}{posWeightSuffix}-e{Epochs}{(Patience > 0 ? $"-p{Patience}" : string.Empty)}-s{Seed}");
 			}
 		}
 
@@ -61,7 +62,8 @@ namespace DepositPropensityNet.ML {
 					"  --lr <x>               Output-layer learning rate (default 0.05)",
 					"  --hidden-lr <x>        Hidden-layer learning rate (default 0.05)",
 					"  --pos-weight <x>       Positive class ('yes') error weight (default 1.0)",
-					"  --epochs <n>           Training epochs (default 100)",
+					"  --epochs <n>           Maximum training epochs (default 100)",
+					"  --patience <n>         Early stop after n epochs without validation-loss improvement (default 0 = off)",
 					"  --log-interval <n>     Print progress every n epochs (default 100 when epochs>=100, else 1)",
 					"  --seed <n>             Random seed for weights, split, and shuffling (default 1234)",
 					"  --train-limit <n>      Use only n training samples (default: all 80% split)",
@@ -116,6 +118,9 @@ namespace DepositPropensityNet.ML {
 						break;
 					case "--epochs":
 						config.Epochs = ParseInt(ReadValue(args, ref index, option, inlineValue), option);
+						break;
+					case "--patience":
+						config.Patience = ParseInt(ReadValue(args, ref index, option, inlineValue), option);
 						break;
 					case "--log-interval":
 						config.LogInterval = ParseInt(ReadValue(args, ref index, option, inlineValue), option);
