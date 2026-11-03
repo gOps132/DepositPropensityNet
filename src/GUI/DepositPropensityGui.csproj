@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>DepositPropensityNet.GUI</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.22" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../ETL/Loader.cs" Link="Model/Loader.cs" />
+    <Compile Include="../ETL/Normalizer.cs" Link="Model/Normalizer.cs" />
+    <Compile Include="../ML/InputNeuron.cs" Link="Model/InputNeuron.cs" />
+    <Compile Include="../ML/HiddenNeuron.cs" Link="Model/HiddenNeuron.cs" />
+    <Compile Include="../ML/OutputNeuron.cs" Link="Model/OutputNeuron.cs" />
+    <Compile Include="../ML/NeuralNetwork.cs" Link="Model/NeuralNetwork.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../weights/*.txt" Link="weights/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
