@@ -8,12 +8,12 @@
 <text x="210" y="52" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">predicted</text>
 <text x="24" y="200" text-anchor="middle" transform="rotate(-90 24 200)" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">actual</text>
 <rect x="100" y="90" width="106" height="106" rx="6" fill="#2563eb" fill-opacity="0.9"/>
-<text x="153" y="150" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#ffffff">797</text>
-<rect x="210" y="90" width="106" height="106" rx="6" fill="#2563eb" fill-opacity="0.122"/>
-<text x="263" y="150" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#111827">22</text>
-<rect x="100" y="200" width="106" height="106" rx="6" fill="#2563eb" fill-opacity="0.169"/>
-<text x="153" y="260" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#111827">69</text>
-<rect x="210" y="200" width="106" height="106" rx="6" fill="#2563eb" fill-opacity="0.117"/>
-<text x="263" y="260" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#111827">17</text>
-<text x="100" y="342" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">Max cell count: 797</text>
+<text x="153" y="150" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#ffffff">7717</text>
+<rect x="210" y="90" width="106" height="106" rx="6" fill="#2563eb" fill-opacity="0.132"/>
+<text x="263" y="150" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#111827">307</text>
+<rect x="100" y="200" width="106" height="106" rx="6" fill="#2563eb" fill-opacity="0.171"/>
+<text x="153" y="260" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#111827">685</text>
+<rect x="210" y="200" width="106" height="106" rx="6" fill="#2563eb" fill-opacity="0.135"/>
+<text x="263" y="260" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#111827">334</text>
+<text x="100" y="342" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">Max cell count: 7717</text>
 </svg>

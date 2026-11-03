@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="430" viewBox="0 0 760 430">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="380" y="30" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="600" fill="#111827">Training and validation accuracy</text>
+<line x1="75" y1="370" x2="730" y2="370" stroke="#e5e7eb" stroke-width="1"/>
+<text x="63" y="374" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">0%</text>
+<line x1="75" y1="308" x2="730" y2="308" stroke="#e5e7eb" stroke-width="1"/>
+<text x="63" y="312" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">20%</text>
+<line x1="75" y1="246" x2="730" y2="246" stroke="#e5e7eb" stroke-width="1"/>
+<text x="63" y="250" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">40%</text>
+<line x1="75" y1="184" x2="730" y2="184" stroke="#e5e7eb" stroke-width="1"/>
+<text x="63" y="188" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">60%</text>
+<line x1="75" y1="122" x2="730" y2="122" stroke="#e5e7eb" stroke-width="1"/>
+<text x="63" y="126" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">80%</text>
+<line x1="75" y1="60" x2="730" y2="60" stroke="#e5e7eb" stroke-width="1"/>
+<text x="63" y="64" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">100%</text>
+<line x1="75" y1="60" x2="75" y2="370" stroke="#9ca3af" stroke-width="1.5"/>
+<line x1="75" y1="370" x2="730" y2="370" stroke="#9ca3af" stroke-width="1.5"/>
+<line x1="75" y1="370" x2="75" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="75" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">1</text>
+<line x1="141.16" y1="370" x2="141.16" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="141.16" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">11</text>
+<line x1="207.32" y1="370" x2="207.32" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="207.32" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">21</text>
+<line x1="273.48" y1="370" x2="273.48" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="273.48" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">31</text>
+<line x1="339.65" y1="370" x2="339.65" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="339.65" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">41</text>
+<line x1="405.81" y1="370" x2="405.81" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="405.81" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">51</text>
+<line x1="471.97" y1="370" x2="471.97" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="471.97" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">61</text>
+<line x1="538.13" y1="370" x2="538.13" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="538.13" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">71</text>
+<line x1="604.29" y1="370" x2="604.29" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="604.29" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">81</text>
+<line x1="670.45" y1="370" x2="670.45" y2="375" stroke="#9ca3af" stroke-width="1"/>
+<text x="670.45" y="392" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">91</text>
+<text x="402.5" y="415" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">epoch</text>
+<text x="20" y="215" text-anchor="middle" transform="rotate(-90 20 215)" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">accuracy</text>
+<polyline fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="75,95.11 81.62,93.46 88.23,93.58 94.85,93.57 101.46,93.42 108.08,93.73 114.7,93.57 121.31,93.55 127.93,93.63 134.55,93.68 141.16,93.56 147.78,93.6 154.39,93.27 161.01,93.69 167.63,93.55 174.24,93.43 180.86,93.59 187.47,93.38 194.09,93.5 200.71,93.44 207.32,93.47 213.94,93.45 220.56,93.41 227.17,93.42 233.79,93.4 240.4,93.37 247.02,93.18 253.64,93.44 260.25,93.37 266.87,93.12 273.48,93.22 280.1,93.23 286.72,93.14 293.33,93.03 299.95,93.01 306.57,93.15 313.18,93.12 319.8,93.02 326.41,93.07 333.03,92.94 339.65,92.86 346.26,92.93 352.88,92.9 359.49,92.86 366.11,92.75 372.73,92.75 379.34,92.93 385.96,92.65 392.58,92.72 399.19,92.66 405.81,92.78 412.42,92.7 419.04,92.66 425.66,92.54 432.27,92.6 438.89,92.71 445.51,92.9 452.12,92.59 458.74,92.64 465.35,92.56 471.97,92.71 478.59,92.46 485.2,92.68 491.82,92.56 498.43,92.55 505.05,92.54 511.67,92.23 518.28,92.38 524.9,92.5 531.52,92.62 538.13,92.31 544.75,92.24 551.36,92.34 557.98,92.45 564.6,92.06 571.21,92.13 577.83,92.23 584.44,92.16 591.06,92.18 597.68,92.09 604.29,92.09 610.91,91.88 617.53,92.18 624.14,92.14 630.76,92.03 637.37,91.88 643.99,91.88 650.61,92.04 657.22,92.09 663.84,92.34 670.45,92.02 677.07,91.98 683.69,92.16 690.3,92 696.92,91.92 703.54,91.95 710.15,91.79 716.77,91.94 723.38,91.88 730,92.04"/>
+<polyline fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="75,92.29 81.62,91.92 88.23,92.12 94.85,92.4 101.46,92.12 108.08,92.05 114.7,91.92 121.31,91.95 127.93,91.92 134.55,92.05 141.16,91.81 147.78,91.81 154.39,91.98 161.01,91.95 167.63,91.68 174.24,91.81 180.86,91.78 187.47,91.78 194.09,92.46 200.71,91.78 207.32,91.81 213.94,91.92 220.56,91.57 227.17,91.5 233.79,92.29 240.4,91.47 247.02,92.16 253.64,91.95 260.25,91.64 266.87,91.54 273.48,91.71 280.1,91.61 286.72,91.47 293.33,91.4 299.95,91.71 306.57,91.5 313.18,92.29 319.8,91.57 326.41,91.81 333.03,91.57 339.65,92.53 346.26,92.05 352.88,91.71 359.49,91.88 366.11,91.78 372.73,93.05 379.34,93.15 385.96,91.78 392.58,91.95 399.19,91.68 405.81,92.46 412.42,92.33 419.04,91.81 425.66,91.81 432.27,92.29 438.89,93.12 445.51,91.95 452.12,92.57 458.74,92.4 465.35,92.46 471.97,92.22 478.59,91.81 485.2,93.25 491.82,92.46 498.43,92.19 505.05,91.85 511.67,92.09 518.28,93.53 524.9,92.33 531.52,92.64 538.13,92.67 544.75,92.19 551.36,92.22 557.98,92.7 564.6,92.16 571.21,92.22 577.83,92.6 584.44,92.09 591.06,91.95 597.68,92.46 604.29,92.4 610.91,92.19 617.53,91.95 624.14,92.84 630.76,92.29 637.37,93.66 643.99,92.05 650.61,92.36 657.22,92.91 663.84,92.36 670.45,92.16 677.07,92.16 683.69,92.19 690.3,92.16 696.92,92.05 703.54,91.81 710.15,92.05 716.77,91.95 723.38,92.6 730,92.02"/>
+<line x1="630" y1="65" x2="650" y2="65" stroke="#2563eb" stroke-width="3"/>
+<text x="657" y="69" text-anchor="start" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">train</text>
+<line x1="630" y1="85" x2="650" y2="85" stroke="#ea580c" stroke-width="3"/>
+<text x="657" y="89" text-anchor="start" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">validation</text>
+</svg>
