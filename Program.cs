@@ -1,68 +1,196 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using DepositPropensityNet.ETL;
+using DepositPropensityNet.ML;
 
 namespace DepositPropensityNet {
 	internal static class Program {
-		private const string DefaultDatasetPath = "data/bank/bank-full.csv";
-		private const double DefaultTrainRatio = 0.80;
-		private const int DefaultSeed = 1234;
+		private const int InputSize = Loader.FeatureCount;
+		private const int OutputCount = 1;
+		private const double PositiveTarget = 1.0;
+		private const double NegativeTarget = 0.0;
+		private const double DecisionThreshold = 0.5;
 
 		private static void Main(string[] args) {
-			string datasetPath = args.Length > 0 ? args[0] : DefaultDatasetPath;
+			TrainingConfig config;
+			try {
+				config = TrainingConfig.Parse(args);
+			}
+			catch (ArgumentException exception) {
+				Console.Error.WriteLine(exception.Message);
+				Console.Error.WriteLine();
+				Console.Error.WriteLine(TrainingConfig.Usage);
+				Environment.ExitCode = 1;
+				return;
+			}
 
-			Console.WriteLine($"Loading and encoding '{datasetPath}'...");
-			(double[][] allInputs, int[] allLabels) = Loader.LoadCsv(datasetPath);
+			if (config.ShowHelp) {
+				Console.WriteLine(TrainingConfig.Usage);
+				return;
+			}
 
-			int totalPositive = CountPositive(allLabels);
-			Console.WriteLine(FormattableString.Invariant(
-				$"Loaded {allInputs.Length} rows x {Loader.FeatureCount} features (dropped 'duration')."));
-			Console.WriteLine(FormattableString.Invariant(
-				$"Target distribution: yes={totalPositive} ({100.0 * totalPositive / allInputs.Length:F2}%), no={allInputs.Length - totalPositive} ({100.0 * (allInputs.Length - totalPositive) / allInputs.Length:F2}%)"));
+			Run(config);
+		}
 
-			Loader.DatasetSplit split = Loader.SplitTrainTest(allInputs, allLabels, DefaultTrainRatio, DefaultSeed);
-			int trainPos = CountPositive(split.TrainLabels);
-			int testPos = CountPositive(split.TestLabels);
+		private static void Run(TrainingConfig config) {
+			Console.WriteLine($"Loading dataset '{config.DataPath}'...");
+			(double[][] allInputs, int[] allLabels) = Loader.LoadCsv(config.DataPath);
 
-			Console.WriteLine(FormattableString.Invariant(
-				$"Split (80/20, seed={DefaultSeed}): train={split.TrainInputs.Length} (yes={100.0 * trainPos / split.TrainInputs.Length:F2}%), test={split.TestInputs.Length} (yes={100.0 * testPos / split.TestInputs.Length:F2}%)"));
+			Loader.DatasetSplit split = Loader.SplitTrainTest(
+				allInputs,
+				allLabels,
+				config.TrainRatio,
+				config.Seed);
 
 			Normalizer normalizer = new Normalizer(Loader.ContinuousFeatureCount);
 			normalizer.FitTransformInPlace(split.TrainInputs);
 			normalizer.TransformInPlace(split.TestInputs);
 
-			Console.WriteLine("\nFitted MinMax Normalizer on Training Split (continuous features 0..5):");
-			for (int i = 0; i < Loader.ContinuousFeatureCount; i++) {
-				Console.WriteLine(FormattableString.Invariant(
-					$"  [{i}] {Loader.ContinuousFeatureNames[i],-10} min={normalizer.GetMinimum(i),8:F1}  max={normalizer.GetMaximum(i),10:F1}"));
-			}
+			int trainCount = Math.Min(config.TrainLimit ?? split.TrainInputs.Length, split.TrainInputs.Length);
+			int validationCount = Math.Min(config.ValidationLimit ?? split.TestInputs.Length, split.TestInputs.Length);
 
-			Console.WriteLine("\nSample normalized training vector [0] (first 9 features + active one-hot indices):");
-			PrintSampleSummary(split.TrainInputs[0], split.TrainLabels[0]);
-		}
+			int[] trainIndices = CreateIndices(trainCount);
+			int[] validationIndices = CreateIndices(validationCount);
 
-		private static int CountPositive(int[] labels) {
-			int count = 0;
-			for (int i = 0; i < labels.Length; i++) {
-				if (labels[i] == 1) count++;
-			}
-			return count;
-		}
+			Directory.CreateDirectory(config.OutputDirectory);
+			Directory.CreateDirectory(config.WeightDirectory);
+			normalizer.Save(Path.Combine(config.WeightDirectory, "normalizer.txt"));
 
-		private static void PrintSampleSummary(double[] features, int label) {
-			Console.Write("  continuous/binary [0..8]: ");
-			for (int i = 0; i < 9; i++) {
-				Console.Write(FormattableString.Invariant($"{features[i]:F4} "));
-			}
-			Console.WriteLine();
+			Console.WriteLine(FormattableString.Invariant(
+				$"config: hidden={config.HiddenCount} lr={config.OutputLearningRate} hidden-lr={config.HiddenLearningRate} pos-weight={config.PositiveClassWeight} epochs={config.Epochs} log-interval={config.EffectiveLogInterval} seed={config.Seed}"));
+			Console.WriteLine(FormattableString.Invariant(
+				$"split: train={trainIndices.Length} test/val={validationIndices.Length} features={InputSize}"));
 
-			Console.Write("  active one-hot indices [9..46]: ");
-			for (int i = 9; i < features.Length; i++) {
-				if (features[i] > 0.5) {
-					Console.Write($"{i} ");
+			NeuralNetwork network = new NeuralNetwork(
+				InputSize,
+				config.HiddenCount,
+				OutputCount,
+				config.OutputLearningRate,
+				config.HiddenLearningRate,
+				config.Seed);
+			Random epochRandom = new Random(config.Seed + 1);
+
+			List<string> logRows = new List<string>(config.Epochs + 1);
+			logRows.Add("epoch,train_loss,train_accuracy,val_loss,val_accuracy,seconds");
+
+			double bestValidationLoss = double.MaxValue;
+			double bestValidationAccuracy = 0.0;
+			int bestEpoch = 0;
+			int logInterval = config.EffectiveLogInterval;
+			DateTime trainingStart = DateTime.Now;
+
+			for (int epoch = 1; epoch <= config.Epochs; epoch++) {
+				DateTime epochStart = DateTime.Now;
+				Shuffle(trainIndices, epochRandom);
+
+				double totalTrainLoss = 0.0;
+				int trainCorrect = 0;
+
+				for (int position = 0; position < trainIndices.Length; position++) {
+					int index = trainIndices[position];
+					int label = split.TrainLabels[index];
+					double sampleWeight = label == 1 ? config.PositiveClassWeight : 1.0;
+
+					totalTrainLoss += TrainOnSample(network, split.TrainInputs[index], label, sampleWeight);
+					if (PredictBinary(network) == label) {
+						trainCorrect++;
+					}
+				}
+
+				(double valLoss, double valAccuracy) = EvaluateLossAndAccuracy(
+					network,
+					split.TestInputs,
+					validationIndices,
+					split.TestLabels);
+
+				double trainLoss = totalTrainLoss / trainIndices.Length;
+				double trainAccuracy = 100.0 * trainCorrect / trainIndices.Length;
+				double valAccuracyPercent = valAccuracy * 100.0;
+
+				if (valLoss < bestValidationLoss) {
+					bestValidationLoss = valLoss;
+					bestValidationAccuracy = valAccuracyPercent;
+					bestEpoch = epoch;
+					network.SaveWeights(Path.Combine(config.WeightDirectory, "best.txt"));
+				}
+
+				double seconds = (DateTime.Now - epochStart).TotalSeconds;
+				logRows.Add(FormattableString.Invariant(
+					$"{epoch},{trainLoss:F6},{trainAccuracy:F3},{valLoss:F6},{valAccuracyPercent:F3},{seconds:F2}"));
+
+				if (epoch == 1 || epoch % logInterval == 0 || epoch == config.Epochs) {
+					Console.WriteLine(FormattableString.Invariant(
+						$"epoch {epoch,4}  loss {trainLoss:F5}  train {trainAccuracy,6:F2}%  val_loss {valLoss:F5}  val {valAccuracyPercent,6:F2}%  {seconds,5:F2}s"));
 				}
 			}
-			Console.WriteLine($" -> label={label} ({(label == 1 ? "yes" : "no")})");
+
+			network.SaveWeights(Path.Combine(config.WeightDirectory, "last.txt"));
+
+			double totalSeconds = (DateTime.Now - trainingStart).TotalSeconds;
+			string trainLogPath = Path.Combine(config.OutputDirectory, $"train-{config.RunName}.csv");
+			File.WriteAllLines(trainLogPath, logRows);
+
+			Console.WriteLine(FormattableString.Invariant(
+				$"best epoch {bestEpoch}  val_loss {bestValidationLoss:F5}  val {bestValidationAccuracy:F2}%  total {totalSeconds:F1}s"));
+			Console.WriteLine(FormattableString.Invariant($"wrote {trainLogPath} and {Path.Combine(config.WeightDirectory, "best.txt")}"));
+		}
+
+		private static double TrainOnSample(NeuralNetwork network, double[] features, int label, double sampleWeight) {
+			SetInputs(network, features);
+			network.SetDesiredOutput(0, label == 1 ? PositiveTarget : NegativeTarget);
+			return network.TrainStep(sampleWeight);
+		}
+
+		private static (double loss, double accuracy) EvaluateLossAndAccuracy(
+			NeuralNetwork network,
+			double[][] inputs,
+			int[] indices,
+			int[] labels) {
+			double totalLoss = 0.0;
+			int correct = 0;
+
+			for (int position = 0; position < indices.Length; position++) {
+				int index = indices[position];
+				SetInputs(network, inputs[index]);
+				network.SetDesiredOutput(0, labels[index] == 1 ? PositiveTarget : NegativeTarget);
+				network.ForwardPass();
+
+				totalLoss += network.CalculateLoss();
+				if (PredictBinary(network) == labels[index]) {
+					correct++;
+				}
+			}
+
+			double avgLoss = indices.Length == 0 ? 0.0 : totalLoss / indices.Length;
+			double accuracy = indices.Length == 0 ? 0.0 : (double)correct / indices.Length;
+			return (avgLoss, accuracy);
+		}
+
+		private static void SetInputs(NeuralNetwork network, double[] features) {
+			for (int inputIndex = 0; inputIndex < features.Length; inputIndex++) {
+				network.SetInput(inputIndex, features[inputIndex]);
+			}
+		}
+
+		private static int PredictBinary(NeuralNetwork network) {
+			return network.GetOutput(0) >= DecisionThreshold ? 1 : 0;
+		}
+
+		private static int[] CreateIndices(int count) {
+			int[] indices = new int[count];
+			for (int index = 0; index < count; index++) {
+				indices[index] = index;
+			}
+			return indices;
+		}
+
+		private static void Shuffle(int[] indices, Random random) {
+			for (int i = indices.Length - 1; i > 0; i--) {
+				int j = random.Next(i + 1);
+				(indices[i], indices[j]) = (indices[j], indices[i]);
+			}
 		}
 	}
 }
